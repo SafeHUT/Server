@@ -3,19 +3,33 @@ import {
     getRoomMembers,
     createRoom,
     addMembersToRoom
-} from "../services/room.service";
+} from "../services/room.service.js";
 import crypto from "crypto";
-import { asyncHandler } from "../utils/apiHandler";
-import { ApiError } from "../utils/apiError";
-import { ApiResponse } from "../utils/apiResponse";
+import { asyncHandler } from "../utils/apiHandler.js";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
 
 const create_new_room = asyncHandler(async(req,res) => {
 
+    const { expires_in } = req.body;
     const userId = req.user.id;
 
-    const roomCode = crypto.randomBytes(3).toString("hex").toUpperCase;
+    const expirationOption = {
+        '1h': 60 * 60 * 1000,
+        '4h': 4 * 60 * 60 * 1000, 
+        '1d': 24 * 60 * 60 * 1000,
+    };
 
-    const room = await createRoom(roomCode, userId);
+    const selectedDuration = expires_in || '1d';
+    if(!expirationOption[selectedDuration]) {
+        throw new ApiError(400, "Invalid expiration time. Must be '1h', '4h' or '1d'");
+    }
+
+    const expiresAt = new Date(Date.now() + expirationOption[selectedDuration]);
+
+    const roomCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+
+    const room = await createRoom(roomCode, userId, expiresAt);
 
     await addMembersToRoom(room.id, userId);
 
@@ -79,7 +93,7 @@ const get_room_details = asyncHandler( async(req, res) => {
 });
 
 export {
-    createRoom,
+    create_new_room,
     join_existing_room,
     get_room_details
 }

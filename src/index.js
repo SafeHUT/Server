@@ -1,9 +1,11 @@
 import "dotenv/config"
 import express, { json } from "express";
 import {query} from "./db/connectionDb.js";
-import userRouter from "./routes/user.route.js";
 import cron from "node-cron";
 import { deleteExpiredRooms } from "./services/room.service.js";
+
+import userRouter from "./routes/user.route.js";
+import roomRouter from "./routes/room.route.js";
 
 const app = express();
 
@@ -13,6 +15,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 
 // Routes 
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/room",roomRouter);
 
 // cron jobs
 cron.schedule("0 * * * *", async () => {

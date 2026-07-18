@@ -1,9 +1,9 @@
 import {query} from "../db/connectionDb.js"
 
-async function createRoom(roomCode, createdBy) {
+async function createRoom(roomCode, createdBy, expiresAt) {
     const result = await query(
-        "INSERT INTO rooms(room_code, created_by) VALUES ($1, $2) RETURNING *;",
-        [roomCode, createdBy]
+        "INSERT INTO rooms(room_code, created_by, expires_at) VALUES ($1, $2, $3) RETURNING *;",
+        [roomCode, createdBy, expiresAt]
     );
     return result.rows[0];
 }
