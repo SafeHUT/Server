@@ -1,4 +1,5 @@
 import { saveMessage } from "../services/message.service.js";
+import { isUserInRoom } from "../services/room.service.js";
 
 function registerRoomEvents(io, socket) {
 

@@ -2,8 +2,10 @@ import {
     getRoomByCode,
     getRoomMembers,
     createRoom,
-    addMembersToRoom
+    addMembersToRoom,
+    isUserInRoom
 } from "../services/room.service.js";
+import { getMessageByRoomId } from "../services/message.service.js";
 import crypto from "crypto";
 import { asyncHandler } from "../utils/apiHandler.js";
 import { ApiError } from "../utils/apiError.js";
@@ -92,8 +94,45 @@ const get_room_details = asyncHandler( async(req, res) => {
     )
 });
 
+const get_room_messages = asyncHandler(async ( req, res ) => {
+
+    const {roomId } = req.params;
+    const userId  = req.user.id;
+
+    const isMember = await isUserInRoom(roomId, userId);
+    if( !isMember ) {
+        throw new ApiError(403 ,"Access Denied: You are not member of this room");
+    }
+
+    // 1. Get pagination parameters from the URL query (e.g., ?page=1&limit=50)
+    // Default to page 1 and 50 messages per page
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50; 
+    const offset = (page - 1) * limit; 
+
+    const room = await getRoomByCode(roomId);
+    if( !room ) {
+        throw new ApiError(404, "Room does not exists");
+    }
+
+    const messages = await getMessageByRoomId(roomId, limit, offset); 
+
+    return res.status(200).json(
+        new ApiResponse(
+            200, {
+                messages,
+                page,
+                limit,
+                hasMore: messages.length === limit
+            },
+            "Chat history fetched successfully"
+        ),
+    );
+});
+
 export {
     create_new_room,
     join_existing_room,
-    get_room_details
+    get_room_details,
+    get_room_messages
 }
