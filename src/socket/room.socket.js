@@ -3,7 +3,13 @@ import { isUserInRoom } from "../services/room.service.js";
 
 function registerRoomEvents(io, socket) {
 
-    socket.on("join_room", (roomId) => {
+    socket.on("join_room", async (roomId) => {
+
+        const isMember = await isUserInRoom( roomId, socket.userId);
+        if( !isMember ) {
+            socket.emit("room_error", { message: "Unauthorized to join this room" });
+            return;
+        }
 
         socket.join(roomId);
 
@@ -18,6 +24,12 @@ function registerRoomEvents(io, socket) {
         if(!roomId || !content) return;
 
         try {
+
+            const isMember = await isUserInRoom(roomId, socket.userId);
+            if (!isMember) {
+                socket.emit("message_error", { message: "Unauthorized: You cannot send messages here" });
+                return;
+            }
 
             const sendMessage = await saveMessage(roomId, socket.userId, content);
             io.to(roomId).emit("recieve_message", sendMessage);
