@@ -1,13 +1,17 @@
 import "dotenv/config"
-import express, { json } from "express";
+import express from "express";
 import {query} from "./db/connectionDb.js";
 import cron from "node-cron";
+import http from "http"; 
+
 import { deleteExpiredRooms } from "./services/room.service.js";
 
 import userRouter from "./routes/user.route.js";
 import roomRouter from "./routes/room.route.js";
+import initializeSocket from "./socket/index.js";
 
 const app = express();
+const server = http.createServer(app);
 
 // Middlewares
 app.use(express.json({limit: "16kb"}));
@@ -35,6 +39,9 @@ app.get("/test", async (req, res) => {
     res.json(result.rows);
 });
 
-app.listen("4000",() => {
-    console.log("listing to port 4000");
+initializeSocket(server);
+
+const PORT = 4000;
+server.listen(PORT,() => {
+    console.log("Server is running on port 4000");
 })

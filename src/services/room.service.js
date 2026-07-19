@@ -10,7 +10,7 @@ async function createRoom(roomCode, createdBy, expiresAt) {
 
 async function getRoomByCode(roomCode) {
     const result = await query(
-        "SELECT * FROM rooms WHERE room_code = $1 RETURNING *;",
+        "SELECT * FROM rooms WHERE room_code = $1;",
         [roomCode]
     );
     return result.rows[0];

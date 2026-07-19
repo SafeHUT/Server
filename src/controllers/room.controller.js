@@ -76,7 +76,7 @@ const get_room_details = asyncHandler( async(req, res) => {
 
     const { room_code } = req.params;
 
-    const room = await getRoomByCode(room_code.toUpperCase);  
+    const room = await getRoomByCode(room_code.toUpperCase());  
     if(!room) {
         throw new ApiError(404, "Room not found");
     }

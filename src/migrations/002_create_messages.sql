@@ -1,0 +1,7 @@
+CREATE TABLE messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    room_id UUID REFERENCES rooms(id) ON DELETE CASCADE,
+    sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
