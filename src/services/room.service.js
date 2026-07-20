@@ -49,11 +49,20 @@ async function isUserInRoom( roomId, userId ) {
    return result.rowCount > 0;
 }
 
+async function removeMemberFromRoom(roomId, userId) {
+    const result = await query(
+        "DELETE FROM room_members WHERE rood_id = $1 AND user_id = $2 RETURNING *;",
+        [roomId, userId]
+    );
+    return result.rowCount;
+}
+
 export {
     createRoom,
     getRoomByCode,
     getRoomMembers,
     deleteExpiredRooms,
     addMembersToRoom,
-    isUserInRoom
+    isUserInRoom,
+    removeMemberFromRoom
 }

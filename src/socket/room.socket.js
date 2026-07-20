@@ -18,6 +18,11 @@ function registerRoomEvents(io, socket) {
         );
     });
 
+    socket.on("leave_room", (roomId) => {
+        socket.leave(roomId);
+        console.log(`User ${socket.userId} detached from socket room ${roomId}`);
+    });
+    
     socket.on("send_message", async (data) => {
 
         const {roomId, content} = data;

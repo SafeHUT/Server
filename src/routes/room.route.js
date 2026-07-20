@@ -4,7 +4,8 @@ import {
     join_existing_room,
     create_new_room,
     get_room_details,
-    get_room_messages
+    get_room_messages,
+    leave_room
 } from "../controllers/room.controller.js";
 
 const router = Router();
@@ -16,5 +17,6 @@ router.post("/join", join_existing_room);
 router.get("/:room_code", get_room_details);
 
 router.get("/:roomId/messages",get_room_messages);
+router.delete("/:roomId/leave",leave_room);
 
 export default router;

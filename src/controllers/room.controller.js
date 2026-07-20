@@ -3,7 +3,8 @@ import {
     getRoomMembers,
     createRoom,
     addMembersToRoom,
-    isUserInRoom
+    isUserInRoom,
+    removeMemberFromRoom
 } from "../services/room.service.js";
 import { getMessageByRoomId } from "../services/message.service.js";
 import crypto from "crypto";
@@ -130,9 +131,25 @@ const get_room_messages = asyncHandler(async ( req, res ) => {
     );
 });
 
+const leave_room = asyncHandler( async ( req, res ) => {
+
+    const { roomId } = req.params;
+    const userId = req.user.id;
+
+    const deletedCount = await removeMemberFromRoom( roomId, userId );
+    if( deletedCount === 0 ) {
+        throw new ApiError(400, "You are not a member of this room or it has already expired");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, null, "left room successfully")
+    );
+})
+
 export {
     create_new_room,
     join_existing_room,
     get_room_details,
-    get_room_messages
+    get_room_messages,
+    leave_room
 }
