@@ -23,15 +23,18 @@ async function deleteCurrentUser(id) {
 }
 
 async function updateAnonymousId(anonymousId, id) {
+
     const result = await query(
         "UPDATE users SET anonymous_id = $1 WHERE id = $2 RETURNING *;",
         [anonymousId, id]
     );
     return result.rows[0];
+
 }
+
 export {
     createUser,
     updateUserName, 
     deleteCurrentUser,
-    updateAnonymousId
+    updateAnonymousId,
 }

@@ -57,6 +57,20 @@ async function removeMemberFromRoom(roomId, userId) {
     return result.rowCount;
 }
 
+async function getUserRooms(userId) {
+
+    const result = await query(
+        `SELECT r.id, r.room_code as token, r.name, r.expires_at, rm.joined_at
+         FROM rooms r 
+         JOIN room_members rm on r.id = rm.room_id  
+         WHERE rm.user_id = $1
+         ORDER BY rm.joined_at DESC;
+        `,[userId]
+    );
+    return result.rows;
+
+}
+
 export {
     createRoom,
     getRoomByCode,
@@ -64,5 +78,6 @@ export {
     deleteExpiredRooms,
     addMembersToRoom,
     isUserInRoom,
-    removeMemberFromRoom
+    removeMemberFromRoom,
+    getUserRooms
 }

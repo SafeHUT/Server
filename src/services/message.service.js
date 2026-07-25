@@ -17,7 +17,7 @@ async function getMessageByRoomId( roomId, limit, offset ) {
             m.created_at,
             m.sender_id,      
             u.name as sender_name,
-            u.anonymous_id as sender_anonymous_id,
+            u.anonymous_id as sender_anonymous_id
         FROM messages m 
         JOIN users u ON m.sender_id = u.id
         WHERE m.room_id = $1 

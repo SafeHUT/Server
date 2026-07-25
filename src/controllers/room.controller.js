@@ -4,7 +4,8 @@ import {
     createRoom,
     addMembersToRoom,
     isUserInRoom,
-    removeMemberFromRoom
+    removeMemberFromRoom,
+    getUserRooms
 } from "../services/room.service.js";
 import { getMessageByRoomId } from "../services/message.service.js";
 import crypto from "crypto";
@@ -45,12 +46,11 @@ const join_existing_room = asyncHandler(async(req, res) => {
 
     const { room_code } = req.body;
     const userId = req.user.id;
-
     if(!room_code) {
         throw new ApiError(400, "room code is required");
     }
 
-    const room = await getRoomByCode(room_code.toUpperCase);
+    const room = await getRoomByCode(room_code.toUpperCase());
     if(!room) {
         throw new ApiError(404, "Room not found or invalid code");
     }
@@ -100,7 +100,12 @@ const get_room_messages = asyncHandler(async ( req, res ) => {
     const {roomId } = req.params;
     const userId  = req.user.id;
 
-    const isMember = await isUserInRoom(roomId, userId);
+    const room = await getRoomByCode(roomId);
+    if( !room ) {
+        throw new ApiError(404, "Room does not exists");
+    }
+
+    const isMember = await isUserInRoom(room.id, userId);
     if( !isMember ) {
         throw new ApiError(403 ,"Access Denied: You are not member of this room");
     }
@@ -111,13 +116,7 @@ const get_room_messages = asyncHandler(async ( req, res ) => {
     const limit = parseInt(req.query.limit, 10) || 50; 
     const offset = (page - 1) * limit; 
 
-    const room = await getRoomByCode(roomId);
-    if( !room ) {
-        throw new ApiError(404, "Room does not exists");
-    }
-
-    const messages = await getMessageByRoomId(roomId, limit, offset); 
-
+    const messages = await getMessageByRoomId(room.id, limit, offset); 
     return res.status(200).json(
         new ApiResponse(
             200, {
@@ -146,10 +145,20 @@ const leave_room = asyncHandler( async ( req, res ) => {
     );
 })
 
+const get_my_rooms = asyncHandler( async ( req, res ) => {
+
+    const rooms = await getUserRooms(req.user.id);
+    return res.status(200).json(
+        new ApiResponse(200, rooms, "Rooms fetched successfully")
+    )
+
+})
+
 export {
     create_new_room,
     join_existing_room,
     get_room_details,
     get_room_messages,
-    leave_room
+    leave_room,
+    get_my_rooms
 }
