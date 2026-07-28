@@ -38,25 +38,20 @@ const get_current_user = asyncHandler(async (req, res) => {
     );
 });
 
-const update_current_user = asyncHandler(async (req, res) => {
-    let { name } = req.body;
+const update_name = asyncHandler(async (req, res) => {
 
-    if(!name) {
+    let { name } = req.body;
+    if( !name || name.trim().length === 0 ) {
         throw new ApiError(400, "Name field is required");
     }
 
-    name = name.trim();
-    if(!name) {
-        throw new ApiError(400, "Name field cannot be empty");
-    }
-
-    const updatedUser = await updateUserName(name, req.user.id); 
+    const updatedUser = await updateUserName(req.user.id, name.trim()); 
 
     return res.status(200).json(
         new ApiResponse(
             200,
             updatedUser, 
-            "User updated"
+            "Name updated successfully"
         )
     );
 });
@@ -92,7 +87,7 @@ const generate_new_anonymous_id = asyncHandler(async (req, res) => {
 export {
     generate_user,
     get_current_user,
-    update_current_user,
+    update_name,
     delete_current_user,
     generate_new_anonymous_id
 };

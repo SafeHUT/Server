@@ -5,7 +5,8 @@ import {
     addMembersToRoom,
     isUserInRoom,
     removeMemberFromRoom,
-    getUserRooms
+    getUserRooms,
+    updateRoomName
 } from "../services/room.service.js";
 import { getMessageByRoomId } from "../services/message.service.js";
 import crypto from "crypto";
@@ -99,7 +100,7 @@ const get_room_messages = asyncHandler(async ( req, res ) => {
 
     const {roomId } = req.params;
     const userId  = req.user.id;
-
+    console.log("room: ",roomId);
     const room = await getRoomByCode(roomId);
     if( !room ) {
         throw new ApiError(404, "Room does not exists");
@@ -154,11 +155,31 @@ const get_my_rooms = asyncHandler( async ( req, res ) => {
 
 })
 
+const update_room_name = asyncHandler( async( req, res ) => {
+
+    const { roomId } = req.params;
+    const { name }  = req.body;
+    const userId = req.user.id;
+
+    if( !name || name.trim().length < 0 ) { 
+        throw new ApiError(400, "Room name cannot be empty")
+    }
+
+    const updatedRoom = await updateRoomName(roomId, userId, name.trim());
+    if( !updatedRoom ) throw new ApiError(403, "You are not a member of this room or it does not exists");
+
+    res.status(200).json(
+        new ApiResponse(200, updatedRoom, "Room name updated")
+    )
+
+})
+
 export {
     create_new_room,
     join_existing_room,
     get_room_details,
     get_room_messages,
     leave_room,
-    get_my_rooms
+    get_my_rooms,
+    update_room_name
 }

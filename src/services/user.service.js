@@ -8,10 +8,10 @@ async function createUser(uuid) {
     return result.rows[0];
 }
 
-async function updateUserName(name, id) {
+async function updateUserName(userId, name) {
     const result = await query(
-        "UPDATE users SET name = $1 WHERE id = $2 RETURNING *;",
-        [name, id]
+        "UPDATE users SET name = $1 WHERE id = $2 RETURNING id, anonymous_id, name, created_at;",
+        [name, userId]
     );
     return result.rows[0];
 }
@@ -31,6 +31,7 @@ async function updateAnonymousId(anonymousId, id) {
     return result.rows[0];
 
 }
+
 
 export {
     createUser,

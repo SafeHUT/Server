@@ -10,7 +10,7 @@ async function createRoom(roomCode, createdBy, expiresAt) {
 
 async function getRoomByCode(roomCode) {
     const result = await query(
-        "SELECT * FROM rooms WHERE room_code = $1;",
+        "SELECT * FROM rooms WHERE id = $1;",
         [roomCode]
     );
     return result.rows[0];
@@ -51,7 +51,7 @@ async function isUserInRoom( roomId, userId ) {
 
 async function removeMemberFromRoom(roomId, userId) {
     const result = await query(
-        "DELETE FROM room_members WHERE rood_id = $1 AND user_id = $2 RETURNING *;",
+        "DELETE FROM room_members WHERE room_id = $1 AND user_id = $2 RETURNING *;",
         [roomId, userId]
     );
     return result.rowCount;
@@ -71,6 +71,18 @@ async function getUserRooms(userId) {
 
 }
 
+async function updateRoomName (roomId, userId, newName) {
+    const result = await query(
+        `UPDATE rooms 
+        SET name = $1 
+        WHERE id = (
+            SELECT room_id FROM room_members WHERE room_id = $2 AND user_id = $3
+        ) RETURNING id, name, room_code;
+        `[newName, roomId, userId]
+    )
+    return result.rowCount > 0 ? result.rows[0]: null;
+}
+
 export {
     createRoom,
     getRoomByCode,
@@ -79,5 +91,6 @@ export {
     addMembersToRoom,
     isUserInRoom,
     removeMemberFromRoom,
-    getUserRooms
+    getUserRooms,
+    updateRoomName
 }
