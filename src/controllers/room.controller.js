@@ -1,5 +1,6 @@
 import {
     getRoomByCode,
+    getRoomById,
     getRoomMembers,
     createRoom,
     addMembersToRoom,
@@ -34,7 +35,13 @@ const create_new_room = asyncHandler(async(req,res) => {
 
     const expiresAt = new Date(Date.now() + expirationOption[selectedDuration]);
 
-    const roomCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+    let roomCode;
+    let _room;
+    
+    do {
+        roomCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+        _room = await getRoomByCode(roomCode);
+    } while(_room);
 
     const room = await createRoom(roomCode, userId, expiresAt);
 
@@ -112,10 +119,10 @@ const get_room_details = asyncHandler( async(req, res) => {
 
 const get_room_messages = asyncHandler(async ( req, res ) => {
 
-    const {roomId } = req.params;
+    const { roomId } = req.params;
     const userId  = req.user.id;
     console.log("room: ",roomId);
-    const room = await getRoomByCode(roomId);
+    const room = await getRoomById(roomId);
     if( !room ) {
         throw new ApiError(404, "Room does not exists");
     }
@@ -125,8 +132,6 @@ const get_room_messages = asyncHandler(async ( req, res ) => {
         throw new ApiError(403 ,"Access Denied: You are not member of this room");
     }
 
-    // 1. Get pagination parameters from the URL query (e.g., ?page=1&limit=50)
-    // Default to page 1 and 50 messages per page
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 50; 
     const offset = (page - 1) * limit; 
@@ -175,7 +180,7 @@ const update_room_name = asyncHandler( async( req, res ) => {
     const { name }  = req.body;
     const userId = req.user.id;
 
-    if( !name || name.trim().length < 0 ) { 
+    if( !name?.trim() ) { 
         throw new ApiError(400, "Room name cannot be empty")
     }
 
@@ -197,9 +202,9 @@ const toggle_mute = asyncHandler ( async ( req, res ) => {
     if( typeof isMuted !== 'boolean' ) 
         throw new ApiError(400, "isMuted must be a boolean value");
 
-    const updateMember = await toggleRoomMute(roomId, userId, isMuted);
+    const updatedMember = await toggleRoomMute(roomId, userId, isMuted);
 
-    if( !updateMember )
+    if( !updatedMember )
         throw new ApiError( 403, "You are not a member of this room");
 
     return res.status(200).json(

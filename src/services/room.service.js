@@ -10,8 +10,16 @@ async function createRoom(roomCode, createdBy, expiresAt) {
 
 async function getRoomByCode(roomCode) {
     const result = await query(
-        "SELECT * FROM rooms WHERE id = $1;",
+        "SELECT * FROM rooms WHERE room_code = $1;",
         [roomCode]
+    );
+    return result.rows[0];
+}
+
+async function getRoomById(roomId) {
+    const result = await query(
+        "SELECT * FROM rooms WHERE id = $1;",
+        [roomId]
     );
     return result.rows[0];
 }
@@ -60,7 +68,7 @@ async function removeMemberFromRoom(roomId, userId) {
 
 async function getUserRooms(userId) {
     const result = await query(
-        `SELECT r.id, r.room_code, r.name, r.expires_at, rm.is_muted,
+        `SELECT r.id, r.room_code as token, r.name, r.expires_at, rm.is_muted,
             (SELECT COUNT(*) 
              FROM messages m 
              WHERE m.room_id = r.id AND m.created_at > rm.last_read_at) as unread_count
@@ -110,6 +118,7 @@ async function toggleRoomMute( roomId, userId, isMuted ) {
 export {
     createRoom,
     getRoomByCode,
+    getRoomById,
     getRoomMembers,
     deleteExpiredRooms,
     addMembersToRoom,
