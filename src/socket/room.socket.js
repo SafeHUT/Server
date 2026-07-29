@@ -51,6 +51,19 @@ function registerRoomEvents(io, socket) {
         }
     });
 
+    socket.on("typing", (roomId) => {
+
+        if( !roomId ) return
+        socket.to(roomId).emit("user_typing");
+
+    });
+    socket.on("stop_typing",(roomId) => {
+
+        if(!roomId) return;
+        socket.to(roomId).emit("user_stopped_typing");
+
+    });
+
     socket.on("disconnect", () => {
 
         console.log(

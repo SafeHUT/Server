@@ -6,7 +6,9 @@ import {
     isUserInRoom,
     removeMemberFromRoom,
     getUserRooms,
-    updateRoomName
+    updateRoomName,
+    toggleRoomMute,
+    markRoomAsRead
 } from "../services/room.service.js";
 import { getMessageByRoomId } from "../services/message.service.js";
 import crypto from "crypto";
@@ -186,6 +188,35 @@ const update_room_name = asyncHandler( async( req, res ) => {
 
 })
 
+const toggle_mute = asyncHandler ( async ( req, res ) => {
+
+    const { roomId }= req.params;
+    const { isMuted }= req.body;
+    const userId = req.user.id;
+
+    if( typeof isMuted !== 'boolean' ) 
+        throw new ApiError(400, "isMuted must be a boolean value");
+
+    const updateMember = await toggleRoomMute(roomId, userId, isMuted);
+
+    if( !updateMember )
+        throw new ApiError( 403, "You are not a member of this room");
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedMember, `Notifications ${isMuted ? 'muted' : 'unmuted'}`)
+    );
+
+});
+
+const mark_as_read = asyncHandler (async ( req, res ) => {
+    
+    const { roomId } = req.params;
+    await markRoomAsRead(roomId, req.user.id);
+    return res.status(200).json(
+        new ApiResponse(200, null, "Room marked as read")
+    );
+});
+
 export {
     create_new_room,
     join_existing_room,
@@ -194,5 +225,7 @@ export {
     leave_room,
     get_my_rooms,
     update_room_name,
-    get_members
+    get_members,
+    toggle_mute,
+    mark_as_read
 }

@@ -8,7 +8,9 @@ import {
     leave_room,
     get_my_rooms,
     update_room_name,
-    get_members
+    get_members,
+    toggle_mute,
+    mark_as_read
 } from "../controllers/room.controller.js";
 
 const router = Router();
@@ -26,5 +28,7 @@ router.patch("/:roomId/name",update_room_name);
 router.get("/:roomId/messages",get_room_messages);
 router.delete("/:roomId/leave",leave_room);
 
+router.patch("/:roomId/mute",toggle_mute);
+router.patch("/:roomId/read", mark_as_read);
 
 export default router;

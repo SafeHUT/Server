@@ -59,17 +59,27 @@ async function removeMemberFromRoom(roomId, userId) {
 }
 
 async function getUserRooms(userId) {
-
     const result = await query(
-        `SELECT r.id, r.room_code as token, r.name, r.expires_at, rm.joined_at
-         FROM rooms r 
-         JOIN room_members rm on r.id = rm.room_id  
+        `SELECT r.id, r.room_code, r.name, r.expires_at, rm.is_muted,
+            (SELECT COUNT(*) 
+             FROM messages m 
+             WHERE m.room_id = r.id AND m.created_at > rm.last_read_at) as unread_count
+         FROM rooms r
+         JOIN room_members rm ON r.id = rm.room_id
          WHERE rm.user_id = $1
-         ORDER BY rm.joined_at DESC;
-        `,[userId]
+         ORDER BY r.created_at DESC;`,
+        [userId]
     );
     return result.rows;
+}
 
+async function markRoomAsRead(roomId, userId) {
+    await query(
+        `UPDATE room_members 
+         SET last_read_at = CURRENT_TIMESTAMP 
+         WHERE room_id = $1 AND user_id = $2`,
+        [roomId, userId]
+    );
 }
 
 async function updateRoomName (roomId, userId, newName) {
@@ -84,6 +94,18 @@ async function updateRoomName (roomId, userId, newName) {
     return result.rowCount > 0 ? result.rows[0]: null;
 }
 
+async function toggleRoomMute( roomId, userId, isMuted ) {
+    const result = await query(
+        `
+        UPDATE room_members 
+        SET is_muted = $1
+        WHERE room_id = $2 AND user_id = $3 
+        RETURNING is_muted;
+        `, [ isMuted, roomId, userId ]
+    );
+    return result.rowCount > 0 ? result.rows[0] : null;
+}
+
 
 export {
     createRoom,
@@ -94,5 +116,7 @@ export {
     isUserInRoom,
     removeMemberFromRoom,
     getUserRooms,
-    updateRoomName
+    updateRoomName,
+    toggleRoomMute,
+    markRoomAsRead
 }
