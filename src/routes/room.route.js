@@ -7,7 +7,8 @@ import {
     get_room_messages,
     leave_room,
     get_my_rooms,
-    update_room_name
+    update_room_name,
+    get_members
 } from "../controllers/room.controller.js";
 
 const router = Router();
@@ -16,6 +17,7 @@ router.use(verifyJWT);
 
 
 router.get("/my-rooms",get_my_rooms);
+router.get("/:roomId/members",get_members);
 router.post("/create", create_new_room);
 router.post("/join", join_existing_room);
 router.get("/:room_code", get_room_details);

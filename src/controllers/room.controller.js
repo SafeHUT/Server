@@ -43,6 +43,18 @@ const create_new_room = asyncHandler(async(req,res) => {
     );
 });
 
+const get_members = asyncHandler( async ( req, res ) => {
+
+    const { roomId } = req.params;
+    const members = await getRoomMembers(roomId); 
+
+    if( !members ) throw new ApiError(204, "Room has no members");
+
+    res.status(200).json(
+        new ApiResponse(200, members, 'Room members fetched successfully')
+    )
+});
+
 const join_existing_room = asyncHandler(async(req, res) => {
 
     const { room_code } = req.body;
@@ -181,5 +193,6 @@ export {
     get_room_messages,
     leave_room,
     get_my_rooms,
-    update_room_name
+    update_room_name,
+    get_members
 }

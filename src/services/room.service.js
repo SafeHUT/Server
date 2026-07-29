@@ -29,9 +29,10 @@ async function getRoomMembers(roomId) {
         `SELECT u.id, u.anonymous_id, u.name, rm.joined_at
         FROM users u 
         JOIN room_members rm ON u.id = rm.user_id 
-        WHERE rm.room_id = $1;`,[roomId]
+        WHERE rm.room_id = $1
+        ORDER BY rm.joined_at ASC;`,[roomId]
     );
-    return result.rows[0];
+    return result.rows;
 }
 
 async function deleteExpiredRooms() {
@@ -78,10 +79,11 @@ async function updateRoomName (roomId, userId, newName) {
         WHERE id = (
             SELECT room_id FROM room_members WHERE room_id = $2 AND user_id = $3
         ) RETURNING id, name, room_code;
-        `[newName, roomId, userId]
+        `,[newName, roomId, userId]
     )
     return result.rowCount > 0 ? result.rows[0]: null;
 }
+
 
 export {
     createRoom,

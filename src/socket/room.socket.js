@@ -37,7 +37,7 @@ function registerRoomEvents(io, socket) {
             }
 
             const sendMessage = await saveMessage(roomId, socket.userId, content);
-            io.to(roomId).emit("recieve_message", sendMessage);
+            io.to(roomId).emit("receive_message", sendMessage);
 
         } catch(error) {
 
