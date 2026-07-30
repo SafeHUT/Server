@@ -1,5 +1,5 @@
 import { saveMessage } from "../services/message.service.js";
-import { isUserInRoom } from "../services/room.service.js";
+import { deleteMessage, editMessage, isUserInRoom } from "../services/room.service.js";
 
 function registerRoomEvents(io, socket) {
 
@@ -47,8 +47,38 @@ function registerRoomEvents(io, socket) {
                     message: "Failed to send message"
                 }
             );
-
         }
+    });
+
+    socket.on("delete_message", async (data) => {
+        
+        const { messageId, roomId } = data;
+        if( !messageId || !roomId ) return;
+
+        try {
+            deleteMessage( messageId, socket.userId );
+            io.to(roomId).emit("message_deleted", messageId);
+        } catch(e) {
+            console.error("Failed to delete message",e);
+        }
+    });
+
+    socket.on("edit_message", async (data) => {
+
+        const { messageId, roomId, newContent } = data;
+        if( !messageId || !roomId || !newContent ) return;
+
+        try {
+
+            const updatedMsg = await editMessage(messageId, socket.userId, newContent);
+            if(updatedMsg) {
+                io.to(roomId).emit("message_edited",updatedMsg);
+            }
+        } catch(e) {
+
+            console.error("Failed to edit message: ",e);
+        }
+
     });
 
     socket.on("typing", (roomId) => {

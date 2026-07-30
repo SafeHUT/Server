@@ -9,7 +9,7 @@ import {
     getUserRooms,
     updateRoomName,
     toggleRoomMute,
-    markRoomAsRead
+    markRoomAsRead,
 } from "../services/room.service.js";
 import { getMessageByRoomId } from "../services/message.service.js";
 import crypto from "crypto";

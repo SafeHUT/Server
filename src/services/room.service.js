@@ -2,7 +2,7 @@ import {query} from "../db/connectionDb.js"
 
 async function createRoom(roomCode, createdBy, expiresAt) {
     const result = await query(
-        "INSERT INTO rooms(room_code, created_by, expires_at) VALUES ($1, $2, $3) RETURNING *;",
+        `INSERT INTO rooms(room_code, created_by, expires_at) VALUES ($1, $2, $3) RETURNING *;`,
         [roomCode, createdBy, expiresAt]
     );
     return result.rows[0];
@@ -114,6 +114,22 @@ async function toggleRoomMute( roomId, userId, isMuted ) {
     return result.rowCount > 0 ? result.rows[0] : null;
 }
 
+async function deleteMessage(messageId, userId) {
+
+    await query (
+    `
+       DELETE FROM messages WHERE id = $1 AND sender_id = $2;
+    `,[ messageId, userId ]
+    );
+}
+
+async function editMessage( messageId, userId, content ) {
+    const result = await query (
+        `UPDATE messages SET content = $1 WHERE id = $2 AND sender_id = $3 RETURNING *`,
+        [content, messageId,userId]
+    );
+    return result.rows[0];
+}
 
 export {
     createRoom,
@@ -127,5 +143,7 @@ export {
     getUserRooms,
     updateRoomName,
     toggleRoomMute,
-    markRoomAsRead
+    markRoomAsRead,
+    deleteMessage,
+    editMessage
 }
