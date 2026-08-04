@@ -17,6 +17,6 @@ router.route("/current-user")
     .get(verifyJWT, get_current_user)
     .delete(verifyJWT, delete_current_user);
 
-router.patch("/regenerate-id", verifyJWT, generate_new_anonymous_id);
+router.patch("/refresh-id", verifyJWT, generate_new_anonymous_id);
 
 export default router;

@@ -68,7 +68,6 @@ const delete_current_user = asyncHandler(async (req,res) => {
 const generate_new_anonymous_id = asyncHandler(async (req, res) => {
     const newAnonymousId = crypto.randomBytes(6).toString("hex");
     const userId = req.user.id; 
-
     const updatedUser = await updateAnonymousId(newAnonymousId, userId);
 
     const newAccessToken = generateAccessToken(updatedUser.id, updatedUser.anonymous_id);
