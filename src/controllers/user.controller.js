@@ -15,7 +15,6 @@ const generate_user = asyncHandler(async(req, res) => {
     if (!publicKey || typeof publicKey !== 'string') {
         throw new ApiError(400, "Public key is required for End-to-End Encryption");
     }
-
     const anonymousId = crypto.randomBytes(6).toString("hex");
     const user = await createUser(anonymousId, publicKey); 
     
