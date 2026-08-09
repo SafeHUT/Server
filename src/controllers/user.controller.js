@@ -11,8 +11,13 @@ import { ApiError } from "../utils/apiError.js";
 import generateAccessToken from "../utils/generateToken.js";
 
 const generate_user = asyncHandler(async(req, res) => {
+    const { publicKey } = req.body;
+    if (!publicKey || typeof publicKey !== 'string') {
+        throw new ApiError(400, "Public key is required for End-to-End Encryption");
+    }
+
     const anonymousId = crypto.randomBytes(6).toString("hex");
-    const user = await createUser(anonymousId); 
+    const user = await createUser(anonymousId, publicKey); 
     
     const accessToken = generateAccessToken(user.id, user.anonymous_id);
 

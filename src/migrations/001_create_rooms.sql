@@ -15,3 +15,4 @@ CREATE TABLE room_members (
 );
 ALTER TABLE room_members ADD COLUMN is_muted BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE room_members ADD COLUMN last_read_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE room_members ADD COLUMN encrypted_room_key TEXT NOT NULL;

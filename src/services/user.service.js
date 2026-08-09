@@ -1,9 +1,9 @@
 import { query } from "../db/connectionDb.js";
 
-async function createUser(uuid) {
+async function createUser(uuid, publicKey) {
     const result = await query(
-        "INSERT INTO users(anonymous_id) VALUES($1) RETURNING *;",
-        [uuid]
+        "INSERT INTO users(anonymous_id, public_key) VALUES($1, $2) RETURNING *;",
+        [uuid, publicKey]
     )
     return result.rows[0];
 }
