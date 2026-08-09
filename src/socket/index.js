@@ -18,7 +18,9 @@ function initializeSocket(server) {
 
     io.on("connection", (socket) => {
 
-        console.log(`Connected ${socket.userId}`);
+        const userId = socket.userId;
+        socket.join(userId);
+        console.log(`User ${userId} connected and joined personal room`);
 
         registerRoomEvents(io, socket);
     });
